@@ -1,0 +1,17 @@
+{
+  "name": "bad-apple-browser-console",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "license": "MIT",
+  "main": "generate-braille.js",
+  "scripts": {
+    "extract-frames": "npx rimraf video/frames && npx mkdirp video/frames && ffmpeg -i video/video.mp4 -vf fps=10 video/frames/frame%04d.jpeg",
+    "extract-audio": "ffmpeg -i video/video.mp4 public/audio.mp3",
+    "serve": "npx serve public",
+    "start": "npm run extract-frames && node . && npm run serve"
+  },
+  "dependencies": {
+    "img2braille": "^1.0.1"
+  }
+}
