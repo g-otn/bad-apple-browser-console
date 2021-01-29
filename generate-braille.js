@@ -9,16 +9,16 @@ const asciiOpts = {
 
 (async () => {
   let frameIndex = 1, text = '';
-  console.info('Generating braille art...')
+  console.info('Generating braille art frames with', asciiWidth, 'ascii width');
 
   do {
     const result = await braillefy(`./video/frames/frame${(frameIndex++ + '').padStart(4, '0')}.jpeg`, asciiWidth, asciiOpts)
       .catch(() => null);
     
     if (!result) break;
-    else text += result + '\n'
+    else text += result + '\n';
   } while (true);
 
-  fs.writeFileSync('public/braille.txt', text);
-  console.info('Written ' + frameIndex + ' "braille frames" to file')
+  fs.writeFileSync('video/braille.txt', text);
+  console.info('Written ' + frameIndex + ' "braille art frames" to text file');
 })();
