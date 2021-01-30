@@ -1,5 +1,6 @@
 const button = document.getElementById('play');
-const player = document.getElementById('player')
+const player = document.getElementById('player');
+const body = document.querySelector('body');
 
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
@@ -9,16 +10,17 @@ let frames;
 const stop = () => {
   window.stopTimer = true;
   button.innerText = 'Play'
+  body.classList.remove('hide-text')
   postMessageToPlayer('stopVideo')
 }
 
 const play = async () => {
   button.innerText = 'Stop'
+  body.classList.add('hide-text')
   console.clear();
-
   postMessageToPlayer('playVideo')
-
   window.stopTimer = false;
+
   doTimer(frames.length * ms, fps, (steps, count) => {
     if (frames[count]) {
       if (isFirefox && (ms * count % 6000) < ms) { // Firefox console slows down a bit if console isn't cleared once in a while
