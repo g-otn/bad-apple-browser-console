@@ -1,4 +1,5 @@
 const button = document.getElementById('play');
+const player = document.getElementById('player')
 
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
@@ -8,12 +9,14 @@ let frames;
 const stop = () => {
   window.stopTimer = true;
   button.innerText = 'Play'
+  postMessageToPlayer('stopVideo')
 }
 
 const play = async () => {
   button.innerText = 'Stop'
   console.clear();
-  // i = 0;
+
+  postMessageToPlayer('playVideo')
 
   window.stopTimer = false;
   doTimer(frames.length * ms, fps, (steps, count) => {
@@ -62,5 +65,9 @@ const load = () => {
     });
   });
 }
+
+const postMessageToPlayer = (command, args = '') => {
+  player.contentWindow.postMessage('{"event":"command","func":"' + command + '","args":"' + args + '"}', '*');
+};
 
 load();
