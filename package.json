@@ -6,10 +6,11 @@
   "license": "MIT",
   "main": "generate-braille.js",
   "scripts": {
-    "extract-frames": "npx rimraf video/frames && npx mkdirp video/frames && ffmpeg -i video/video.mp4 -vf fps=30 video/frames/frame%04d.jpeg",
+    "extract-frames": "npx rimraf video/frames && npx mkdirp video/frames && ffmpeg -i video/video.mp4 -vf fps=30,scale=240:-1 video/frames/frame%04d.jpeg",
+    "generate-text": "npx rimraf video/braille.txt && node .",
     "zip-text": "echo Zipping text file && cd video && npx bestzip ../public/braille.zip braille.txt",
     "serve": "npx serve public",
-    "start": "npm run extract-frames && node . && npm run zip-text && npm run serve",
+    "start": "npm run extract-frames && npm run generate-text && npm run zip-text && npm run serve",
     "gh-pages-deploy": "git subtree --prefix public push origin gh-pages"
   },
   "dependencies": {
