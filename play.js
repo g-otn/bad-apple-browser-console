@@ -109,8 +109,6 @@ const load = () => {
   });
 };
 
-load();
-
 function onYouTubeIframeAPIReady() {
   // Creating a player enables window message events from the embed we can listen to
   window.player = new YT.Player('playerFrame', {
@@ -125,3 +123,11 @@ function onYouTubeIframeAPIReady() {
     },
   });
 }
+
+// This code loads the IFrame Player API code asynchronously.
+let tag = document.createElement('script');
+tag.src = 'https://www.youtube.com/iframe_api';
+let firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+load();
