@@ -19,7 +19,7 @@ const stop = () => {
   window.stopTimer = true;
   button.innerText = 'Play';
   body.classList.remove('hide-text');
-  player.stopVideo();
+  window.player.stopVideo();
 };
 
 const play = async () => {
@@ -40,10 +40,10 @@ const play = async () => {
      * This avoids initial buffering from desyncing video from console
      */
     setTimeout(() => {
-      player.stopVideo();
+      window.player.stopVideo();
     }, 1500);
     setTimeout(() => {
-      player.playVideo();
+      window.player.playVideo();
       button.disabled = false;
       button.innerText = 'Stop';
 
@@ -63,7 +63,7 @@ const play = async () => {
   };
   addEventListener('message', listener);
 
-  player.playVideo();
+  window.player.playVideo();
   window.stopTimer = false;
 };
 
