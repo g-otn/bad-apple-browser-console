@@ -1,6 +1,8 @@
 # bad-apple-browser-console
 Watch the [Bad Apple!!](https://www.youtube.com/watch?v=FtutLA63Cp8) video through the browser console.
 
+[demo](https://user-images.githubusercontent.com/44736064/181088573-a254b429-5200-42e0-9ffb-178cb32d0d42.mp4)
+
 This project generates and repeatedly logs braille ascii art text through a timer
 into the browser console so that it looks like a video.
 
