@@ -7,11 +7,9 @@ const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 const fps = 30,
   msPerFrame = 1000 / fps;
 let frames;
-let lastCurrentTime;
 
 const isVideoLoadedAndPlaying = (e) => {
   const { event, info } = JSON.parse(e.data);
-  lastCurrentTime = info.currentTime;
   return event === 'infoDelivery' && info.currentTime > 0;
 };
 
@@ -34,32 +32,22 @@ const play = async () => {
 
     removeEventListener('message', listener);
 
-    /**
-     * Quick and dirty trick to improve sync between video and console:
-     * Play video once for 1s to load start of the video then restart playback.
-     * This avoids initial buffering from desyncing video from console
-     */
-    setTimeout(() => {
-      window.player.stopVideo();
-    }, 1500);
-    setTimeout(() => {
-      window.player.playVideo();
-      button.disabled = false;
-      button.innerText = 'Stop';
+    button.disabled = false;
+    button.innerText = 'Stop';
 
-      // start printing
-      doTimer(frames.length * msPerFrame, fps, (steps, count) => {
-        if (frames[count]) {
-          if (isFirefox && (msPerFrame * count) % 6000 < msPerFrame) {
-            // Firefox console slows down a bit if console isn't cleared once in a while
-            console.clear();
-          }
-          console.log(frames[count]);
-        } else {
-          stop();
+    // start printing
+    console.log(frames[0]);
+    doTimer(frames.length * msPerFrame, fps, (steps, count) => {
+      if (frames[count + 1]) {
+        if (isFirefox && (msPerFrame * count) % 6000 < msPerFrame) {
+          // Firefox console slows down a bit if console isn't cleared once in a while
+          console.clear();
         }
-      });
-    }, 2000);
+        console.log(frames[count + 1]);
+      } else {
+        stop();
+      }
+    });
   };
   addEventListener('message', listener);
 
