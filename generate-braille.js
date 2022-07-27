@@ -1,7 +1,10 @@
 const { braillefy } = require('img2braille');
 const fs = require('fs');
+const cliProgress = require('cli-progress');
+const workerFarm = require('worker-farm');
 
-const batchSize = 100;
+// -----
+// Params to modify art
 
 const asciiWidth = 100;
 const asciiOpts = {
@@ -9,44 +12,61 @@ const asciiOpts = {
   invert: false,
 };
 
-(async () => {
-  let batchIndex = 0;
-  console.info('Generating braille art frames with', asciiWidth, 'ascii width');
+// -----
 
-  // Braillefy and write to file all frames through batches
-  do {
-    let text = '', stop = false;
-    const promises = [];
+const frameCount = fs.readdirSync('./video/frames').length;
+const workers = workerFarm(require.resolve('./child'));
 
-    // Create all promises for the current batch
-    for (let i = 0; i < batchSize; i++) {
-      const frameIndex = batchIndex * batchSize + i + 1;
-      console.log('batch', batchIndex, 'frame', frameIndex)
+const framesPerWorker = 5;
+const bar1 = new cliProgress.SingleBar({ etaBuffer: framesPerWorker * 50 });
+const workerCount = Math.ceil(frameCount / framesPerWorker);
 
-      // It seems most of expensive work is done synchronously anyways
-      promises.push(braillefy(`./video/frames/frame${(frameIndex + '').padStart(4, '0')}.jpeg`, asciiWidth, asciiOpts)
+console.info(
+  `Generating ${frameCount} frames with ${asciiWidth} width through ${workerCount} batches`
+);
 
-      // After the last frame is braillefied, the remaining batch promises will all be rejected and then catched
-        .catch(err => { stop = true })); // File not found, no more frames, shouldn't create next batch
+bar1.start(frameCount, 0);
+const allFrames = new Array(frameCount);
+for (let i = 0; i < workerCount; i++) {
+  const startFrame = i * framesPerWorker + 1;
+  const endFrame = Math.min((i + 1) * framesPerWorker, frameCount);
+
+  // Create workers to process multiple frames at once
+  workers(
+    {
+      index: i,
+      startFrame,
+      endFrame,
+      asciiWidth,
+      asciiOpts,
+    },
+    (log, frames) => {
+      // console.log(log, bar1.getProgress());
+      // Store processed frames in their correct indices to keep order
+      for (let j = startFrame - 1, k = 0; j < endFrame; j++, k++) {
+        allFrames[j] = frames[k];
+      }
+
+      bar1.increment(frames.length);
+
+      // Last worker triggered callback
+      if (bar1.getProgress() >= 1) {
+        bar1.stop();
+      }
     }
+  );
+}
 
-    // Concatenate all braillefied frames from current batch
-    await Promise.all(promises)
-      .then(values => {
-        for (let i = 0; i < values.length; i++) {
-          // Filter only resolved promises (found frames)
-          if (values[i]) text += values[i] + '\n';
-          else break;
-        }
-      });
+bar1.on('stop', () => {
+  // Kill child processes
+  workerFarm.end(workers);
 
-    // Append concatenated braillefied frames into file, batch per batch
-    fs.appendFileSync('video/braille.txt', text);
+  const text = allFrames
+    .join('\n\n')
+    // Replace braille character representing blank ("⠄") with actual blank braille character ("⠀")
+    .replace(/\u2804/gm, '\u2800');
 
-    // Stop when at least one of the batch promises got rejected
-    if (stop) break;
-
-    batchIndex++;
-  } while (true);
-  console.info('Written braillefied frames to text file');
-})();
+  // Write final file
+  fs.appendFileSync('video/braille.txt', text);
+  console.info(`Written braille frames into text file`);
+});
