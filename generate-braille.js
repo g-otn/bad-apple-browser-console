@@ -61,12 +61,11 @@ bar1.on('stop', () => {
   // Kill child processes
   workerFarm.end(workers);
 
-  const text = allFrames
-    .join('\n\n')
-    // Replace braille character representing blank ("⠄") with actual blank braille character ("⠀")
-    .replace(/\u2804/gm, '\u2800');
+  const text = allFrames.join('\n\n');
+  // Replace braille character representing blank ("⠄") with actual blank braille character ("⠀")
+  // .replace(/\u2804/gm, '\u2800');
 
   // Write final file
-  fs.appendFileSync('video/braille.txt', text);
+  fs.writeFileSync('video/braille.txt', text);
   console.info(`Written braille frames into text file`);
 });
